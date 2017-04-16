@@ -126,15 +126,24 @@ class Timeseries():
 
         plt.close('all')
         plt.figure(1)
-        plt.errorbar(dates, bpam, bpvr, fmt='r')
+        plt.errorbar(dates, bpam, bpvr, fmt='r,')
         intdates = np.array([x.toordinal() for x in dates])
-        fltbp = bpam.astype(np.float)
-        idx = np.isfinite(fltbp)
+        fltsys = systs.astype(np.float)
+        fltdia = diass.astype(np.float)
+        idx = np.isfinite(fltsys)  # Assume systolic/diastolic are same
         fpts = intdates[idx]
-        fbp = fltbp[idx]
-        bpt = np.polyfit(intdates[idx], fltbp[idx], 1)
-        bpe = np.poly1d(bpt)
-        plt.plot(intdates[idx], bpe(intdates[idx]), 'm--')
+        fbs = fltsys[idx]
+        fbd = fltdia[idx]
+        bps = np.polyfit(fpts, fbs, 1)
+        bpse = np.poly1d(bps)
+        bpd = np.polyfit(fpts, fbd, 1)
+        bpde = np.poly1d(bpd)
+        plt.plot(fpts, bpse(fpts), 'm--')
+        plt.plot(fpts, bpde(fpts), 'm--')
+        plt.plot(fpts, np.array([140.0 for x in fpts]), color='0.5',
+                 linestyle='dashed')
+        plt.plot(fpts, np.array([90.0 for x in fpts]), color='0.5',
+                 linestyle='dashed')
         plt.title("Blood Pressure")
         plt.ylabel("mmHg")
         plt.figure(2)
@@ -146,6 +155,7 @@ class Timeseries():
         plt.plot(intdates[idx], bge(intdates[idx]), 'c--')
         plt.title("Blood Glucose")
         plt.ylabel("mg/dL")
+        plt.ylim(60, 150)
 
     def display_plot(self):
         """Display the plotted data.
