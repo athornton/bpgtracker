@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 import argparse
-from .csvhandler import CSVHandler
 from .subject import Subject
 
 
@@ -13,8 +12,7 @@ def entrypoint():
     if "file" not in args:
         raise ValueError("CSV file containing time series must be specified")
     bpg = createbpgtracker(args.name, args.file)
-    bpg.timeseries.create_plot()
-    bpg.timeseries.display_plot()
+    bpg.plot_timeseries()
 
 
 def parse_args():
@@ -31,9 +29,7 @@ def parse_args():
 def createbpgtracker(name, file):
     """Create new tracker from name and file.
     """
-    handler = CSVHandler(file)
-    entries = handler.load_from_csv(file)
-    bpg = Subject(name, entries)
+    bpg = Subject(name, file)
     return bpg
 
 if __name__ == "__main__":

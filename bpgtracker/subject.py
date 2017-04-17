@@ -22,3 +22,9 @@ class Subject:
         self.timeseries = None
         if timeseries is not None:
             self.timeseries = Timeseries(timeseries)
+
+    def plot_timeseries(self):
+        """Create and display plot from timeseries data"""
+        if self.timeseries is not None:
+            self.timeseries.create_plot(name=self.person.name)
+            self.timeseries.display_plot()
