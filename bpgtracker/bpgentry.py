@@ -3,10 +3,11 @@
 date.
 """
 
-import numpy as np
 import datetime
+import numpy as np
 
 
+# pylint: disable=too-few-public-methods
 class BPGEntry:
     """Class representing a blood pressure and glucose entry for a particular
     date.
@@ -19,7 +20,13 @@ class BPGEntry:
         """
         if not date:
             raise ValueError("Date is required for a BGPEntry.")
-        self.date = self._normalize_datestr(date)
+        if isinstance(date, str):
+            self.date = datetime.datetime.strptime(date, "%Y/%m/%d")
+        elif isinstance(date, datetime.datetime):
+            self.date = date
+        else:
+            errstr = "Date must be a YYYY/MM/DD string or a datetime object."
+            raise ValueError(errstr)
         # We take 0 to mean, "no reading", not "dead."  Same with None.
         if not systolic:
             systolic = np.nan
@@ -48,8 +55,3 @@ class BPGEntry:
             else:
                 mstrs.append(str(val))
         return "%s: %s/%s %s" % (mstrs[0], mstrs[1], mstrs[2], mstrs[3])
-
-    def _normalize_datestr(self, datestr):
-        """Parse our date string format.
-        """
-        return datetime.datetime.strptime(datestr, "%Y/%m/%d")

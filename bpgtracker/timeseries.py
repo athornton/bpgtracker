@@ -6,6 +6,7 @@ import datetime
 from collections import OrderedDict
 import numpy as np
 import matplotlib as ml
+# pylint: disable=invalid-name, wrong-import-position
 try:
     ipy = get_ipython()
 except NameError:
@@ -77,11 +78,6 @@ class Timeseries():
     def set(self, entry):
         """Add an item to the timeseries.
         """
-        self.__setitem__(entry)
-
-    def __setitem__(self, entry):
-        """Add an item to the timeseries.
-        """
         if not isinstance(entry, BPGEntry):
             raise ValueError("Timeseries only accepts BGPEntries")
         key = datetime.datetime.strftime(entry.date, "%Y/%m/%d")
@@ -96,11 +92,6 @@ class Timeseries():
         self._timeseries = ordd
 
     def get(self, key):
-        """Return a single timeseries entry.
-        """
-        return self.__getitem__(key)
-
-    def __getitem__(self, key):
         """Return a single timeseries entry.
         """
         return self._timeseries[key]
@@ -120,6 +111,7 @@ class Timeseries():
         """
         return self._timeseries
 
+    # pylint: disable=too-many-locals, too-many-statements
     def create_plot(self, name=None):
         """Create plot from timeseries, optionally with subject name attached.
         """
@@ -139,14 +131,14 @@ class Timeseries():
         intdates = np.array([x.toordinal() for x in dates])
         fltsys = systs.astype(np.float)
         fltdia = diass.astype(np.float)
+        # Numpy doesn't play well with pylint.
+        # pylint: disable=no-member
         idx = np.isfinite(fltsys)  # Assume systolic/diastolic are same
         fpts = intdates[idx]
+        # 1.96 std. dev. is 95% confidence.
+        bins = np.array([1.96, 1.0, -1.0, -1.96])
         fbs = fltsys[idx]
-        fbsstd = fbs.std()
-        sys_conf = fbsstd * 1.96
         fbd = fltdia[idx]
-        fbdstd = fbd.std()
-        dia_conf = fbdstd * 1.96
         bps = np.polyfit(fpts, fbs, 1)
         bpse = np.poly1d(bps)
         bpd = np.polyfit(fpts, fbd, 1)
@@ -155,14 +147,9 @@ class Timeseries():
         dmodel = bpde(fpts)
         # Add one standard deviation and 95% confidence intervals
         #  for each of systolic and diastolic
-        plt.plot(fpts, smodel + sys_conf, linestyle='dashed', color='thistle')
-        plt.plot(fpts, smodel + fbsstd, linestyle='dashed', color='plum')
-        plt.plot(fpts, smodel - fbsstd, linestyle='dashed', color='plum')
-        plt.plot(fpts, smodel - sys_conf, linestyle='dashed', color='thistle')
-        plt.plot(fpts, dmodel + dia_conf, linestyle='dashed', color='thistle')
-        plt.plot(fpts, dmodel + fbdstd, linestyle='dashed', color='plum')
-        plt.plot(fpts, dmodel - fbdstd, linestyle='dashed', color='plum')
-        plt.plot(fpts, dmodel - dia_conf, linestyle='dashed', color='thistle')
+        self._plot_errors(fpts, smodel, fbs.std(), bins, ['thistle', 'plum'])
+        self._plot_errors(fpts, dmodel, fbd.std(), bins, ['bisque', 'wheat'])
+        # Add high-blood-pressure threshold
         plt.plot(fpts, np.array([140.0 for x in fpts]), color='0.5',
                  linestyle='dashed')
         plt.plot(fpts, np.array([90.0 for x in fpts]), color='0.5',
@@ -170,7 +157,7 @@ class Timeseries():
         # Plot data and then regression last so they go on top
         plt.errorbar(dates, bpam, bpvr, fmt='r,')
         plt.plot(fpts, smodel, 'm--')
-        plt.plot(fpts, dmodel, 'm--')
+        plt.plot(fpts, dmodel, color='tan', linestyle='dashed')
         plotname = "Blood Pressure"
         if name:
             plotname += " for %s" % name
@@ -183,20 +170,12 @@ class Timeseries():
         idx = np.isfinite(fltglc)
         fpts = intdates[idx]
         fglc = fltglc[idx]
-        fglcstd = fglc.std()
-        glc_conf = fglcstd * 1.96
         bgt = np.polyfit(fpts, fglc, 1)
         bge = np.poly1d(bgt)
         gmodel = bge(fpts)
         # Add one standard deviation and 95% confidence intervals
-        plt.plot(fpts, gmodel + glc_conf,
-                 color='skyblue', linestyle='dashed')
-        plt.plot(fpts, gmodel + fglcstd,
-                 color='deepskyblue', linestyle='dashed')
-        plt.plot(fpts, gmodel - fglcstd,
-                 color='deepskyblue', linestyle='dashed')
-        plt.plot(fpts, gmodel - glc_conf,
-                 color='skyblue', linestyle='dashed')
+        self._plot_errors(fpts, gmodel, fglc.std(), bins,
+                          ['skyblue', 'deepskyblue'])
         # Plot data and then regression last so they go on top
         plt.plot(dates, glucs, 'b')
         plt.plot(fpts, gmodel, 'c--')
@@ -208,6 +187,20 @@ class Timeseries():
         plt.ylabel("mg/dL")
         plt.ylim(60, 150)
 
+    # pylint: disable=no-self-use, too-many-arguments
+    def _plot_errors(self, xrg, model, stddev, bands, colors):
+        if len(bands) != 2 * len(colors):
+            raise ValueError("Number of bands must be 2x number of colors")
+        bandvals = [x * stddev for x in bands]
+        colorbands = [x for x in colors]
+        colorbands.extend([x for x in colors[::-1]])
+        idx = 0
+        for band in bandvals:
+            plt.plot(xrg, model + band,
+                     color=colorbands[idx], linestyle='dashed')
+            idx += 1
+
+    # pylint: disable=no-self-use
     def display_plot(self):
         """Display the plotted data.
         """
