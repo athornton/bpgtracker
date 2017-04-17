@@ -18,7 +18,7 @@ class CSVHandler:
         self.infilename = infile
         self.outfilename = outfile
 
-    def load_from_csv(self, filename=None):
+    def load_entries_from_csv(self, filename=None):
         """Load entries from file; if filename is specified, resets
         handler object infilename.
         """
@@ -35,9 +35,9 @@ class CSVHandler:
                 entries.append(BPGEntry(date, systolic, diastolic, glucose))
         return entries
 
-    def write_to_csv(self, entries, filename=None):
-        """Write entries to file; if filename is specified, resets handler
-        object outfilename.
+    def write_entries_to_csv(self, entries, filename=None):
+        """Write timeseries entries to file; if filename is specified,
+        resets handler object outfilename.
         """
         if filename:
             self.outfilename = filename
