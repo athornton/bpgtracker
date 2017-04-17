@@ -147,8 +147,10 @@ class Timeseries():
         dmodel = bpde(fpts)
         # Add one standard deviation and 95% confidence intervals
         #  for each of systolic and diastolic
-        self._plot_errors(fpts, smodel, fbs.std(), bins, ['thistle', 'plum'])
-        self._plot_errors(fpts, dmodel, fbd.std(), bins, ['bisque', 'wheat'])
+        self._plot_confidence_bands(
+            fpts, smodel, fbs.std(), bins, ['thistle', 'plum'])
+        self._plot_confidence_bands(
+            fpts, dmodel, fbd.std(), bins, ['wheat', 'tan'])
         # Add high-blood-pressure threshold
         plt.plot(fpts, np.array([140.0 for x in fpts]), color='0.5',
                  linestyle='dashed')
@@ -157,7 +159,7 @@ class Timeseries():
         # Plot data and then regression last so they go on top
         plt.errorbar(dates, bpam, bpvr, fmt='r,')
         plt.plot(fpts, smodel, 'm--')
-        plt.plot(fpts, dmodel, color='tan', linestyle='dashed')
+        plt.plot(fpts, dmodel, color='brown', linestyle='dashed')
         plotname = "Blood Pressure"
         if name:
             plotname += " for %s" % name
@@ -174,8 +176,8 @@ class Timeseries():
         bge = np.poly1d(bgt)
         gmodel = bge(fpts)
         # Add one standard deviation and 95% confidence intervals
-        self._plot_errors(fpts, gmodel, fglc.std(), bins,
-                          ['skyblue', 'deepskyblue'])
+        self._plot_confidence_bands(fpts, gmodel, fglc.std(), bins,
+                                    ['skyblue', 'deepskyblue'])
         # Plot data and then regression last so they go on top
         plt.plot(dates, glucs, 'b')
         plt.plot(fpts, gmodel, 'c--')
@@ -188,7 +190,7 @@ class Timeseries():
         plt.ylim(60, 150)
 
     # pylint: disable=no-self-use, too-many-arguments
-    def _plot_errors(self, xrg, model, stddev, bands, colors):
+    def _plot_confidence_bands(self, xrg, model, stddev, bands, colors):
         if len(bands) != 2 * len(colors):
             raise ValueError("Number of bands must be 2x number of colors")
         bandvals = [x * stddev for x in bands]
