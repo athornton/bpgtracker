@@ -4,8 +4,8 @@
 
 import csv
 import datetime
-from .bpgentry import BPGEntry
 import numpy as np
+from .bpgentry import BPGEntry
 
 
 class CSVHandler:
@@ -43,13 +43,18 @@ class CSVHandler:
             self.outfilename = filename
         if not self.outfilename:
             raise ValueError("No CSV file to write")
-        with open(filename, "w", newline='') as outfile:
+        with open(self.outfilename, "w", newline='') as outfile:
             csvwrt = csv.writer(outfile)
             csvwrt.writerow(BPGEntry.FIELDS)
             for entry in entries:
                 datestr = datetime.datetime.strftime(entry.date, "%Y/%m/%d")
                 row = [datestr]
-                for val in [entry.systolic, entry.diastolic, entry.glucose]:
+                syst = entry.systolic
+                dias = entry.diastolic
+                gluc = entry.glucose
+                if np.isnan(syst) and np.isnan(dias) and np.isnan(gluc):
+                    continue  # Skip dates with no data.
+                for val in [syst, dias, gluc]:
                     if np.isnan(val):
                         row.append('')
                     else:

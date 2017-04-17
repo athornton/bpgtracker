@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+"""CLI for bpgtracker
+"""
 import argparse
 from .subject import Subject
 
@@ -31,6 +33,7 @@ def createbpgtracker(name, file):
     """
     bpg = Subject(name, file)
     return bpg
+
 
 if __name__ == "__main__":
     entrypoint()

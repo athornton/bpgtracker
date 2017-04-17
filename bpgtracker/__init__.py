@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+"""Blood Pressure and Glucose tracking module.
+"""
 from .bpgentry import BPGEntry
 from .csvhandler import CSVHandler
 from .subject import Subject
