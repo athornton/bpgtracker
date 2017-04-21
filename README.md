@@ -1,6 +1,7 @@
 # bpgtracker
 
-Python classes for blood glucose and pressure tracking.
+Python classes for blood glucose and pressure tracking.  Testing push from 
+Jupyterlab.
 
 ## Usage
 
