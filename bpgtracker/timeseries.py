@@ -178,6 +178,9 @@ class Timeseries():
         # Add one standard deviation and 95% confidence intervals
         self._plot_confidence_bands(fpts, gmodel, fglc.std(), bins,
                                     ['skyblue', 'deepskyblue'])
+        # Add high-blood-glucose threshold
+        plt.plot(fpts, np.array([126.0 for x in fpts]), color='0.5',
+                 linestyle='dashed')
         # Plot data and then regression last so they go on top
         plt.plot(dates, glucs, 'b')
         plt.plot(fpts, gmodel, 'c--')
